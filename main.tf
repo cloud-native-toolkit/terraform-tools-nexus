@@ -1,7 +1,7 @@
 
 resource "null_resource" "nexus-subscription" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/subscription.yaml -n ${var.operator_namespace}"
+    command = "kubectl apply -f ${path.module}/yaml/subscription.yaml -n ${var.operator_namespace}"
 
     environment = {
       KUBECONFIG = var.cluster_config_file
@@ -13,7 +13,7 @@ resource "null_resource" "nexus-role" {
   depends_on = [null_resource.nexus-subscription]
 
   provisioner "local-exec" {
-    command = "cat ${path.module}/operator-role.yaml | sed \"s/SA_NAMESPACE/${var.operator_namespace}/g\" | kubectl apply -f - -n ${var.app_namespace}"
+    command = "cat ${path.module}/yaml/operator-role.yaml | sed \"s/SA_NAMESPACE/${var.operator_namespace}/g\" | kubectl apply -f - -n ${var.app_namespace}"
 
     environment = {
       KUBECONFIG = var.cluster_config_file
@@ -25,7 +25,7 @@ resource "null_resource" "nexus-repo-install" {
   depends_on = [null_resource.nexus-role]
 
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/nexus-repo.yaml -n ${var.app_namespace}"
+    command = "kubectl apply -f ${path.module}/yaml/nexus-repo.yaml -n ${var.app_namespace}"
 
     environment = {
       KUBECONFIG = var.cluster_config_file
