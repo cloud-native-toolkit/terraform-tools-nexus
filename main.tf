@@ -33,8 +33,20 @@ resource "null_resource" "nexus-repo-install" {
   }
 }
 
-resource "null_resource" "nexus-repo-patch" {
+resource "null_resource" "nexus-serviceaccount" {
   depends_on = [null_resource.nexus-repo-install]
+
+  provisioner "local-exec" {
+    command = "cat ${path.module}/yaml/serviceaccount-scc.yaml | sed \"s/NAMESPACE/${var.app_namespace}/g\" | kubectl apply -f - -n ${var.app_namespace}"
+
+    environment = {
+      KUBECONFIG = var.cluster_config_file
+    }
+  }
+}
+
+resource "null_resource" "nexus-repo-patch" {
+  depends_on = [null_resource.nexus-serviceaccount]
 
   provisioner "local-exec" {
     command = "kubectl patch deployment/nexusrepo-sonatype-nexus --type json -p='[{\"op\": \"add\", \"path\": \"/spec/template/spec/serviceAccount\", \"value\": \"nexus\"}]' -n ${var.app_namespace}"
