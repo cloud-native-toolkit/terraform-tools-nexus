@@ -7,7 +7,7 @@ provider "helm" {
 locals {
   tmp_dir       = "${path.cwd}/.tmp"
   host          = "${var.name}-${var.app_namespace}.${var.ingress_subdomain}"
-  url_endpoint  = "https://${host}"
+  url_endpoint  = "https://${local.host}"
   password_file = "${path.cwd}/nexus-password.val"
   password      = data.local_file.nexus-password.content
 }
