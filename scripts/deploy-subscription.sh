@@ -38,3 +38,9 @@ spec:
 EOL
 
 kubectl apply -f ${YAML_FILE} -n "${OPERATOR_NAMESPACE}"
+
+sleep 2
+until kubectl get crd/nexus.apps.m88i.io 1>/dev/null 2>/dev/null; do
+  echo "Waiting for Nexus operator to install"
+  sleep 30
+done
