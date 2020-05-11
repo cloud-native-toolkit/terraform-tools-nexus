@@ -32,6 +32,7 @@ metadata:
   name: nexus-operator-hub
 spec:
   channel: alpha
+  installPlanApproval: Automatic
   name: nexus-operator-hub
   source: $SOURCE
   sourceNamespace: $OLM_NAMESPACE
