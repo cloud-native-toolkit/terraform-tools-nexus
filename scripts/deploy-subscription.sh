@@ -37,7 +37,11 @@ spec:
   sourceNamespace: $OLM_NAMESPACE
 EOL
 
+set -e
+
 kubectl apply -f ${YAML_FILE} -n "${OPERATOR_NAMESPACE}"
+
+set +e
 
 sleep 2
 until kubectl get crd/nexus.apps.m88i.io 1>/dev/null 2>/dev/null; do
