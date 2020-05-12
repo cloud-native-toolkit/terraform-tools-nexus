@@ -28,7 +28,6 @@ metadata:
 spec:
   networking:
     expose: true
-    host: $HOST
   persistence:
     persistent: true
     volumeSize: 10Gi
@@ -45,7 +44,11 @@ EOL
 
 kubectl apply -f ${YAML_FILE} -n "${NAMESPACE}"
 
-kubectl rollout status deployment/${NAME} -n "${NAMESPACE}"
+sleep 2
 
-POD_NAME=$(kubectl get pods -n "${NAMESPACE}" -l app=${NAME} -o jsonpath='{range .items[]}{.metadata.name}{"\n"}{end}')
-kubectl exec "pod/${POD_NAME}" -n "${NAMESPACE}" cat /nexus-data/admin.password > "${OUTPUT_FILE}"
+kubectl rollout status deployment/${NAME} -n "${NAMESPACE}" || exit 1
+
+if [[ -n "${OUTPUT_FILE}" ]]; then
+  POD_NAME=$(kubectl get pods -n "${NAMESPACE}" -l app=${NAME} -o jsonpath='{range .items[]}{.metadata.name}{"\n"}{end}')
+  kubectl exec "pod/${POD_NAME}" -n "${NAMESPACE}" cat /nexus-data/admin.password > "${OUTPUT_FILE}"
+fi
