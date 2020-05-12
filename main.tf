@@ -41,16 +41,11 @@ data "local_file" "nexus-password" {
   filename = local.password_file
 }
 
-data "helm_repository" "toolkit-charts" {
-  name = "toolkit-charts"
-  url  = "https://ibm-garage-cloud.github.io/toolkit-charts/"
-}
-
 resource "helm_release" "nexus-config" {
   depends_on = [null_resource.nexus-instance]
 
   name         = "nexus"
-  repository   = data.helm_repository.toolkit-charts.name
+  repository   = "https://ibm-garage-cloud.github.io/toolkit-charts/"
   chart        = "tool-config"
   namespace    = var.app_namespace
   force_update = true
