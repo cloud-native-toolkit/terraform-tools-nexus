@@ -29,11 +29,11 @@ cat <<EOL > ${YAML_FILE}
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: nexus-operator-hub
+  name: nexus-operator-m88i
 spec:
   channel: alpha
   installPlanApproval: Automatic
-  name: nexus-operator-hub
+  name: nexus-operator-m88i
   source: $SOURCE
   sourceNamespace: $OLM_NAMESPACE
 EOL
