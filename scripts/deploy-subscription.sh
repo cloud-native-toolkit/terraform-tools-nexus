@@ -3,6 +3,7 @@
 CLUSTER_TYPE="$1"
 OPERATOR_NAMESPACE="$2"
 OLM_NAMESPACE="$3"
+APP_NAMESPACE="$4"
 
 if [[ -z "${TMP_DIR}" ]]; then
   TMP_DIR=".tmp"
@@ -23,9 +24,27 @@ if [[ -z "${OLM_NAMESPACE}" ]]; then
   fi
 fi
 
-YAML_FILE=${TMP_DIR}/nexus-subscription.yaml
+if [[ "${OPERATOR_NAMESPACE}" == "${APP_NAMESPACE}" ]]; then
+  # we are installing the operator into a namespace instead of cluster-wide
+  # create a operatorgroup
+  OPERATOR_GROUP_YAML=${TMP_DIR}/nexus-operatorgroup.yaml
 
-cat <<EOL > ${YAML_FILE}
+  cat <<EOL > ${OPERATOR_GROUP_YAML}
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: nexus-operatorgroup
+spec:
+  targetNamespaces:
+  - ${OPERATOR_NAMESPACE}
+EOL
+
+  kubectl apply -f ${OPERATOR_GROUP_YAML} -n "${OPERATOR_NAMESPACE}"
+fi
+
+SUBSCRIPTION_YAML=${TMP_DIR}/nexus-subscription.yaml
+
+cat <<EOL > ${SUBSCRIPTION_YAML}
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -40,7 +59,7 @@ EOL
 
 set -e
 
-kubectl apply -f ${YAML_FILE} -n "${OPERATOR_NAMESPACE}"
+kubectl apply -f ${SUBSCRIPTION_YAML} -n "${OPERATOR_NAMESPACE}"
 
 set +e
 
