@@ -33,7 +33,7 @@ if [[ "${OPERATOR_NAMESPACE}" == "${APP_NAMESPACE}" ]]; then
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
-  name: nexus-operatorgroup
+  name: ${OPERATOR_NAMESPACE}-operatorgroup
 spec:
   targetNamespaces:
   - ${OPERATOR_NAMESPACE}
