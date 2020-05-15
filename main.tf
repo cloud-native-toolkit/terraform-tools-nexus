@@ -14,7 +14,7 @@ locals {
 
 resource "null_resource" "nexus-subscription" {
   provisioner "local-exec" {
-    command = "${path.module}/scripts/deploy-subscription.sh ${var.cluster_type} ${var.app_namespace} ${var.olm_namespace} ${var.app_namespace}"
+    command = "${path.module}/scripts/deploy-subscription.sh ${var.cluster_type} ${var.operator_namespace} ${var.olm_namespace} ${var.app_namespace}"
 
     environment = {
       TMP_DIR    = local.tmp_dir
