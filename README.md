@@ -24,8 +24,8 @@ of the box. For IKS and OCP 3.X OLM must be installed.
 ## Example usage
 
 ```hcl-terraform
-module "dev_tools_jaeger" {
-  source = "github.com/ibm-garage-cloud/terraform-tools-jaeger.git?ref=v1.0.0"
+module "dev_tools_nexus" {
+  source = "github.com/ibm-garage-cloud/terraform-tools-nexus.git?ref=v1.0.0"
 
   cluster_config_file = module.dev_cluster.config_file_path
   cluster_type        = module.dev_cluster.type
