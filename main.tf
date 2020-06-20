@@ -42,7 +42,7 @@ data "local_file" "nexus-password" {
 }
 
 resource "null_resource" "delete-consolelink" {
-  count = var.cluster_type != "kubernetes" ? 1 : 0
+  count = var.cluster_type == "ocp4" ? 1 : 0
 
   provisioner "local-exec" {
     command = "kubectl delete consolelink -l grouping=garage-cloud-native-toolkit -l app=nexus || exit 0"
