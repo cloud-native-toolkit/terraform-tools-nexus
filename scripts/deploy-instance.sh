@@ -16,6 +16,9 @@ mkdir -p "${TMP_DIR}"
 
 if [[ "${CLUSTER_TYPE}" == "kubernetes" ]]; then
   HOST="${NAME}-${NAMESPACE}.${INGRESS_SUBDOMAIN}"
+  REDHAT_IMAGE="false"
+else
+  REDHAT_IMAGE="true"
 fi
 
 YAML_FILE=${TMP_DIR}/nexus-instance-${NAME}.yaml
@@ -39,7 +42,7 @@ spec:
     requests:
       cpu: '1'
       memory: 2Gi
-  useRedHatImage: false
+  useRedHatImage: ${REDHAT_IMAGE}
 EOL
 
 kubectl apply -f ${YAML_FILE} -n "${NAMESPACE}"
