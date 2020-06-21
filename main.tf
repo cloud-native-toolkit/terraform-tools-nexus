@@ -27,7 +27,7 @@ resource "null_resource" "nexus-instance" {
   depends_on = [null_resource.nexus-subscription]
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/deploy-instance.sh ${var.cluster_type} ${var.app_namespace} ${var.ingress_subdomain} ${var.name} ${local.password_file}"
+    command = "${path.module}/scripts/deploy-instance.sh ${var.cluster_type} ${var.app_namespace} ${var.ingress_subdomain} ${var.name} ${var.service_account} ${local.password_file}"
 
     environment = {
       KUBECONFIG = var.cluster_config_file

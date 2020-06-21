@@ -34,3 +34,8 @@ variable "name" {
   description = "The name for the instance"
   default     = "nexus"
 }
+
+variable "service_account" {
+  type        = string
+  description = "The name of the service account"
+}

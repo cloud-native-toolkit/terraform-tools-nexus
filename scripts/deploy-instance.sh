@@ -3,7 +3,8 @@ CLUSTER_TYPE="$1"
 NAMESPACE="$2"
 INGRESS_SUBDOMAIN="$3"
 NAME="$4"
-OUTPUT_FILE="$5"
+SERVICE_ACCOUNT="$5"
+OUTPUT_FILE="$6"
 
 if [[ -z "${NAME}" ]]; then
   NAME=nexus
@@ -18,7 +19,7 @@ if [[ "${CLUSTER_TYPE}" == "kubernetes" ]]; then
   HOST="${NAME}-${NAMESPACE}.${INGRESS_SUBDOMAIN}"
   REDHAT_IMAGE="false"
 else
-  REDHAT_IMAGE="true"
+  REDHAT_IMAGE="false"
 fi
 
 YAML_FILE=${TMP_DIR}/nexus-instance-${NAME}.yaml
@@ -42,6 +43,7 @@ spec:
     requests:
       cpu: '1'
       memory: 2Gi
+  serviceAccountName: ${SERVICE_ACCOUNT}
   useRedHatImage: ${REDHAT_IMAGE}
 EOL
 
