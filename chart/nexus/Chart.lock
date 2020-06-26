@@ -4,9 +4,9 @@ dependencies:
   version: 0.4.0
 - name: nexus-operator
   repository: https://ibm-garage-cloud.github.io/toolkit-charts/
-  version: 0.1.0
+  version: 0.2.0
 - name: tool-config
   repository: https://ibm-garage-cloud.github.io/toolkit-charts/
   version: 0.7.0
-digest: sha256:a51cd9481596fb812f3d4351e1d4136d9f9aa6663ca0fa56edf54ddb0bafcaf6
-generated: "2020-06-26T13:16:59.179962-05:00"
+digest: sha256:220e88926e3f0f35dfe3639eb091db2c84ac943aa5534c13cef6e4ef68c8425b
+generated: "2020-06-26T13:29:49.795407-05:00"
