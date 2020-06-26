@@ -21,18 +21,15 @@ count=0
 
 sleep 20
 
-until [[ $(curl -X GET -Iq --insecure "${URL}" | grep -E "403|200") ]] || \
-  [[ $count -eq ${WAIT_COUNT} ]]
-do
+until curl -X GET -Iq --insecure "${URL}" | grep -Eq "403|200"; do
+    if [[ $count -eq ${WAIT_COUNT} ]]; then
+      echo ">>> Retry count exceeded. ${URL} not avilable"
+      exit 1
+    fi
+
     echo ">>> waiting for ${URL} to be available"
     sleep ${WAIT_TIME}
     count=$((count + 1))
 done
 
-if [[ $count -eq ${WAIT_COUNT} ]]; then
-  echo ">>> Retry count exceeded. ${URL} not avilable"
-  exit 1
-else
-  echo ">>> ${URL} is avilable"
-fi
-
+echo ">>> ${URL} is avilable"
