@@ -63,7 +63,7 @@ until kubectl get deployment/${DEPLOYMENT} 1> /dev/null 2> /dev/null; do
   fi
 
   echo "Waiting for deployment/${DEPLOYMENT} to start"
-  sleep 10
+  sleep 30
 done
 
 kubectl rollout status deployment/${DEPLOYMENT} -n "${NAMESPACE}" || exit 1
