@@ -54,7 +54,7 @@ sleep 2
 DEPLOYMENT="${NAME}"
 
 count=0
-until kubectl get deployment/${DEPLOYMENT} 1> /dev/null 2> /dev/null; do
+until kubectl get deployment/${DEPLOYMENT} -n "${NAMESPACE}" 1> /dev/null 2> /dev/null; do
   if [[ ${count} -eq 12 ]]; then
     echo "Timed out waiting for deployment/${DEPLOYMENT} to start"
     exit 1
@@ -63,7 +63,7 @@ until kubectl get deployment/${DEPLOYMENT} 1> /dev/null 2> /dev/null; do
   fi
 
   echo "Waiting for deployment/${DEPLOYMENT} to start"
-  sleep 30
+  sleep 10
 done
 
 kubectl rollout status deployment/${DEPLOYMENT} -n "${NAMESPACE}" || exit 1
