@@ -39,3 +39,16 @@ variable "service_account" {
   type        = string
   description = "The name of the service account"
 }
+
+variable "gitops_dir" {
+  type        = string
+  description = "Directory where the gitops repo content should be written"
+  default     = ""
+}
+
+variable "mode" {
+  type        = string
+  description = "The mode of operation for the module (setup)"
+  default     = ""
+}
+
