@@ -64,7 +64,7 @@ resource "helm_release" "nexus-config" {
 
   set {
     name  = "url"
-    value = local.host
+    value = local.url_endpoint
   }
 
   set {
@@ -79,7 +79,12 @@ resource "helm_release" "nexus-config" {
 
   set {
     name  = "applicationMenu"
-    value = var.cluster_type != "kubernetes"
+    value = true
+  }
+
+  set {
+    name  = "clusterType"
+    value = var.cluster_type
   }
 
   set {
