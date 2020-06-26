@@ -19,11 +19,9 @@ fi
 
 count=0
 
-sleep 20
-
-until curl -X GET -Iq --insecure "${URL}" | grep -Eq "403|200"; do
+until curl -X GET -Iq --insecure "${URL}" | grep -E "403|200"; do
     if [[ $count -eq ${WAIT_COUNT} ]]; then
-      echo ">>> Retry count exceeded. ${URL} not avilable"
+      echo ">>> Retry count exceeded. ${URL} not available"
       exit 1
     fi
 
