@@ -17,8 +17,10 @@ mkdir -p "${TMP_DIR}"
 
 if [[ "${CLUSTER_TYPE}" == "kubernetes" ]]; then
   HOST="${NAME}-${NAMESPACE}.${INGRESS_SUBDOMAIN}"
+  EXPOSE_AS="Ingress"
   REDHAT_IMAGE="false"
 else
+  EXPOSE_AS="Route"
   REDHAT_IMAGE="false"
 fi
 
@@ -32,6 +34,7 @@ metadata:
 spec:
   networking:
     expose: true
+    exposeAs: ${EXPOSE_AS}
   persistence:
     persistent: true
     volumeSize: 10Gi
