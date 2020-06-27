@@ -90,4 +90,3 @@ resource "helm_release" "nexus" {
 
   disable_openapi_validation = true
 }
-a
