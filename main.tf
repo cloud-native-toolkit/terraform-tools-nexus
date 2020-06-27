@@ -26,13 +26,6 @@ locals {
     serviceAccount = var.service_account
     app = local.name
   }
-  tool_config            = {
-    url = local.url_endpoint
-    applicationMenu = true
-    displayName = "Nexus"
-    username = "admin"
-    password = ""
-  }
 }
 
 resource "null_resource" "setup-chart" {
@@ -60,7 +53,6 @@ resource "local_file" "nexus-values" {
     global = local.global_config
     service-account = local.service_account_config
     nexus-operator = local.nexus_operator_config
-    tool-config = local.tool_config
   })
   filename = "${local.chart_dir}/values.yaml"
 }
@@ -98,3 +90,4 @@ resource "helm_release" "nexus" {
 
   disable_openapi_validation = true
 }
+a
