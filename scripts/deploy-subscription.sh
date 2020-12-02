@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 CLUSTER_TYPE="$1"
 OPERATOR_NAMESPACE="$2"
@@ -44,11 +44,13 @@ fi
 
 SUBSCRIPTION_YAML=${TMP_DIR}/nexus-subscription.yaml
 
+SUBSCRIPTION_NAME="nexus-operator-m88i"
+
 cat <<EOL > ${SUBSCRIPTION_YAML}
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: nexus-operator-m88i
+  name: ${SUBSCRIPTION_NAME}
 spec:
   channel: alpha
   installPlanApproval: Automatic
@@ -69,4 +71,4 @@ until kubectl get crd/nexus.apps.m88i.io 1>/dev/null 2>/dev/null; do
   sleep 30
 done
 
-
+kubectl rollout status deployment nexus-operator -n "${OPERATOR_NAMESPACE}"

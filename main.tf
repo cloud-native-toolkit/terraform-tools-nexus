@@ -8,44 +8,37 @@ locals {
   tmp_dir       = "${path.cwd}/.tmp"
   host          = "${var.name}-${var.app_namespace}.${var.ingress_subdomain}"
   url_endpoint  = "https://${local.host}"
-  password_file = "${path.cwd}/nexus-password.val"
-  password      = data.local_file.nexus-password.content
-}
-
-resource "null_resource" "nexus-subscription" {
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/deploy-subscription.sh ${var.cluster_type} ${var.operator_namespace} ${var.olm_namespace} ${var.app_namespace}"
-
-    environment = {
-      TMP_DIR    = local.tmp_dir
-      KUBECONFIG = var.cluster_config_file
-    }
+  name                   = "nexus"
+  gitops_dir             = var.gitops_dir != "" ? var.gitops_dir : "${path.cwd}/gitops"
+  chart_name             = "nexus"
+  chart_dir              = "${local.gitops_dir}/${local.chart_name}"
+  global_config          = {
+    clusterType = var.cluster_type
+    ingressSubdomain = var.ingress_subdomain
+  }
+  service_account_config = {
+    name = var.service_account
+    sccs = ["anyuid", "privileged"]
+  }
+  nexus_operator_config  = {
+    olmNamespace = var.olm_namespace
+    operatorNamespace = var.operator_namespace
+    serviceAccount = var.service_account
+    app = local.name
   }
 }
 
-resource "null_resource" "nexus-instance" {
-  depends_on = [null_resource.nexus-subscription]
-
+resource "null_resource" "setup-chart" {
   provisioner "local-exec" {
-    command = "${path.module}/scripts/deploy-instance.sh ${var.cluster_type} ${var.app_namespace} ${var.ingress_subdomain} ${var.name} ${local.password_file}"
-
-    environment = {
-      KUBECONFIG = var.cluster_config_file
-    }
+    command = "mkdir -p ${local.chart_dir} && cp -R ${path.module}/chart/${local.chart_name}/* ${local.chart_dir}"
   }
-}
-
-data "local_file" "nexus-password" {
-  depends_on = [null_resource.nexus-instance]
-
-  filename = local.password_file
 }
 
 resource "null_resource" "delete-consolelink" {
   count = var.cluster_type != "kubernetes" ? 1 : 0
 
   provisioner "local-exec" {
-    command = "kubectl delete consolelink -l grouping=garage-cloud-native-toolkit -l app=nexus || exit 0"
+    command = "kubectl delete consolelink -l grouping=garage-cloud-native-toolkit -l app=${local.name} || exit 0"
 
     environment = {
       KUBECONFIG = var.cluster_config_file
@@ -53,42 +46,47 @@ resource "null_resource" "delete-consolelink" {
   }
 }
 
-resource "helm_release" "nexus-config" {
-  depends_on = [null_resource.nexus-instance, null_resource.delete-consolelink]
+resource "local_file" "nexus-values" {
+  depends_on = [null_resource.setup-chart, null_resource.delete-consolelink]
 
-  name         = "nexus"
-  repository   = "https://ibm-garage-cloud.github.io/toolkit-charts/"
-  chart        = "tool-config"
-  namespace    = var.app_namespace
-  force_update = true
+  content  = yamlencode({
+    global = local.global_config
+    service-account = local.service_account_config
+    nexus-operator = local.nexus_operator_config
+  })
+  filename = "${local.chart_dir}/values.yaml"
+}
 
-  set {
-    name  = "url"
-    value = local.host
+resource "null_resource" "print-values" {
+  provisioner "local-exec" {
+    command = "cat ${local_file.nexus-values.filename}"
   }
+}
 
-  set {
-    name  = "username"
-    value = "admin"
-  }
+resource "null_resource" "scc-cleanup" {
+  depends_on = [local_file.nexus-values]
+  count = var.mode != "setup" ? 1 : 0
 
-  set {
-    name  = "password"
-    value = local.password
-  }
+  provisioner "local-exec" {
+    command = "kubectl delete scc -l app.kubernetes.io/name=${local.name} --wait 1> /dev/null 2> /dev/null || true"
 
-  set {
-    name  = "applicationMenu"
-    value = var.cluster_type != "kubernetes"
+    environment = {
+      KUBECONFIG = var.cluster_config_file
+    }
   }
+}
 
-  set {
-    name  = "ingressSubdomain"
-    value = var.ingress_subdomain
-  }
+resource "helm_release" "nexus" {
+  depends_on = [local_file.nexus-values, null_resource.scc-cleanup]
+  count = var.mode != "setup" ? 1 : 0
 
-  set {
-    name  = "name"
-    value = "Nexus"
-  }
+  name              = "nexus"
+  chart             = local.chart_dir
+  namespace         = var.app_namespace
+  timeout           = 1200
+  dependency_update = true
+  force_update      = true
+  replace           = true
+
+  disable_openapi_validation = true
 }

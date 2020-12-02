@@ -3,7 +3,8 @@ CLUSTER_TYPE="$1"
 NAMESPACE="$2"
 INGRESS_SUBDOMAIN="$3"
 NAME="$4"
-OUTPUT_FILE="$5"
+SERVICE_ACCOUNT="$5"
+OUTPUT_FILE="$6"
 
 if [[ -z "${NAME}" ]]; then
   NAME=nexus
@@ -16,6 +17,11 @@ mkdir -p "${TMP_DIR}"
 
 if [[ "${CLUSTER_TYPE}" == "kubernetes" ]]; then
   HOST="${NAME}-${NAMESPACE}.${INGRESS_SUBDOMAIN}"
+  EXPOSE_AS="Ingress"
+  REDHAT_IMAGE="false"
+else
+  EXPOSE_AS="Route"
+  REDHAT_IMAGE="false"
 fi
 
 YAML_FILE=${TMP_DIR}/nexus-instance-${NAME}.yaml
@@ -28,6 +34,7 @@ metadata:
 spec:
   networking:
     expose: true
+    exposeAs: ${EXPOSE_AS}
   persistence:
     persistent: true
     volumeSize: 10Gi
@@ -39,7 +46,8 @@ spec:
     requests:
       cpu: '1'
       memory: 2Gi
-  useRedHatImage: false
+  serviceAccountName: ${SERVICE_ACCOUNT}
+  useRedHatImage: ${REDHAT_IMAGE}
 EOL
 
 kubectl apply -f ${YAML_FILE} -n "${NAMESPACE}"
@@ -49,16 +57,19 @@ sleep 2
 DEPLOYMENT="${NAME}"
 
 count=0
-until kubectl get deployment/${DEPLOYMENT} 1> /dev/null 2> /dev/null; do
+until kubectl get deployment/${DEPLOYMENT} -n "${NAMESPACE}" 1> /dev/null 2> /dev/null; do
   if [[ ${count} -eq 12 ]]; then
     echo "Timed out waiting for deployment/${DEPLOYMENT} to start"
+
+    kubectl describe nexus "${NAME}" -n "${NAMESPACE}"
+
     exit 1
   else
     count=$((count + 1))
   fi
 
   echo "Waiting for deployment/${DEPLOYMENT} to start"
-  sleep 10
+  sleep 30
 done
 
 kubectl rollout status deployment/${DEPLOYMENT} -n "${NAMESPACE}" || exit 1
